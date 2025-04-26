@@ -1,0 +1,33 @@
+
+
+body {
+    background-image: url(back.png);
+}
+
+
+.box {
+    font-family: "Pacifico", cursive;
+    font-weight: 400;
+    font-style: normal;   
+    font-size: 48px;
+    width: 369px;
+    height: 370px;
+    margin-top: 5%;
+    margin-left: 1%;
+    background-color: lightgray;    
+    border-radius: 10px;
+}
+
+.button {
+    width: 330px;
+    border-radius: 10px;
+    height: 57px;
+    margin-top: 10%;
+    margin-left: 30%;
+    background-color: lightgray;
+    font-family: "Pacifico", cursive;
+    font-weight: 400;
+    font-style: normal;   
+    font-size: 48px;
+    padding: 1%;
+}

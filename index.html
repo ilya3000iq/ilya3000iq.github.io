@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <script src='https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js'></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskMaster - Планировщик задач</title>
+    <style>
+        /* ========== ОБЩИЕ СТИЛИ ========== */
+        
+        /* Сбрасываем стандартные отступы и padding для всех элементов */
+        * {
+            box-sizing: border-box; /* Размеры включают padding и border */
+            margin: 0; /* Убираем внешние отступы */
+            padding: 0; /* Убираем внутренние отступы */
+        }
+
+        /* Основные стили для всего документа */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Современный шрифт */
+            line-height: 1.6; /* Межстрочный интервал */
+            background-image: linear-gradient(#ff0000, #001eff); /* Градиентный фон */
+            min-height: 100vh; /* Минимальная высота на весь экран */
+            display: flex; /* Используем flex-раскладку */
+            flex-direction: column; /* Элементы располагаем вертикально */
+            
+            
+        }
+
+        /* ========== ШАПКА САЙТА ========== */
+        header {
+            background-color: #ff0000; /* Белый с небольшой прозрачностью */
+            padding: 1rem; /* Внутренний отступ 16px */
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Тень для эффекта "поднятия" */
+            text-align: center; /* Выравнивание по центру */
+        }
+
+        /* Стили для логотипа */
+        .logo {
+            font-size: 2.5rem; /* Размер шрифта */
+            color: #2c3e50; /* Цвет текста */
+            font-weight: bold; /* Жирное начертание */
+            display: flex; /* Используем flex для выравнивания */
+            align-items: center; /* Вертикальное выравнивание */
+            justify-content: center; /* Горизонтальное выравнивание */
+            gap: 0.5rem; /* Расстояние между элементами */
+        }
+
+        /* Псевдоэлемент для создания иконки перед текстом лого */
+        .logo::before {
+            content: '✓'; /* Символ галочки */
+            color: #4CAF50; /* Зеленый цвет */
+            font-size: 3rem; /* Размер больше основного текста */
+        }
+
+        /* ========== ОСНОВНОЙ КОНТЕНТ ========== */
+        .container {
+            max-width: 800px; /* Максимальная ширина контейнера */
+            margin: 2rem auto; /* Центрирование по горизонтали */
+            padding: 2rem; /* Внутренние отступы */
+            background: rgb(255, 251, 0); /* Полупрозрачный белый фон */
+            border-radius: 15px; /* Закругление углов */
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1); /* Тень контейнера */
+            flex: 1; /* Занимает доступное пространство */
+        }
+
+        /* Секция для ввода новых задач */
+        .input-section {
+            display: flex; /* Используем flex-раскладку */
+            gap: 1rem; /* Расстояние между элементами */
+            margin-bottom: 2rem; /* Отступ снизу */
+        }
+
+        /* Поле ввода текста */
+        #taskInput {
+            flex: 1; /* Занимает все доступное пространство */
+            padding: 1rem; /* Внутренние отступы */
+            border: 2px solid #e0e0e0; /* Серая рамка */
+            border-radius: 8px; /* Закругление углов */
+            transition: border-color 0.3s ease; /* Плавное изменение цвета рамки */
+        }
+
+        /* Стиль при фокусе на поле ввода */
+        #taskInput:focus {
+            outline: none; /* Убираем стандартный контур */
+            border-color: #4CAF50; /* Зеленая рамка при фокусе */
+        }
+
+        /* ========== КНОПКИ ========== */
+        button {
+            padding: 1rem 2rem; /* Вертикальный и горизонтальный padding */
+            background: linear-gradient(#ff0000, #1500ff); /* Градиентный фон */
+            color: white; /* Белый текст */
+            border: none; /* Без рамки */
+            border-radius: 8px; /* Закругление углов */
+            cursor: pointer; /* Курсор-указатель при наведении */
+            transition: transform 0.2s, box-shadow 0.2s; /* Анимации трансформации и тени */
+        }
+
+        /* Эффекты при наведении на кнопку */
+        button:hover {
+            transform: translateY(-2px); /* Сдвиг вверх на 2px */
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3); /* Тень с зеленым оттенком */
+            rotate: 7200000deg;
+            transition: rotate 12000s linear;
+        }
+
+        
+
+        /* Специальный стиль для кнопки удаления */
+        .delete-btn {
+            background: linear-gradient(#bf7001, #654901); /* Красный градиент */
+        }
+
+        /* ========== СПИСОК ЗАДАЧ ========== */
+        .task-list {
+            list-style: none; /* Убираем маркеры списка */
+        }
+
+        /* Элемент задачи */
+        .task-item {
+            display: flex; /* Flex-раскладка для элементов задачи */
+            align-items: center; /* Выравнивание по вертикали */
+            padding: 1.2rem; /* Внутренние отступы */
+            margin: 0.8rem 0; /* Внешние отступы сверху и снизу */
+            background: #ffffff; /* Белый фон */
+            border-radius: 8px; /* Закругление углов */
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05); /* Легкая тень */
+            transition: all 0.3s ease; /* Анимация всех свойств */
+        }
+
+        /* Эффект при наведении на задачу */
+        .task-item:hover {
+            transform: translateX(5px); /* Сдвиг вправо */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* Усиление тени */
+        }
+
+        /* Стиль для выполненной задачи */
+        .task-item.completed {
+            background: #5a4100; /* Светло-серый фон */
+            opacity: 0.8; /* Небольшая прозрачность */
+        }
+
+        /* Текст выполненной задачи */
+        .task-item.completed span {
+            text-decoration: line-through; /* Перечеркнутый текст */
+            color: #594400; /* Серый цвет текста */
+        }
+
+        /* Текст задачи */
+        .task-item span {
+            flex: 1; /* Занимает все доступное пространство */
+            margin: 0 1.5rem; /* Отступы слева и справа */
+            font-size: 1.1rem; /* Размер шрифта */
+            color: #ff0000; /* Цвет текста */
+            font-family: "Pacifico", cursive;
+            font-weight: 400;
+        }
+
+        /* ========== ПОДВАЛ САЙТА ========== */
+        footer {
+            background: rgba(255, 255, 255, 0.95); /* Полупрозрачный фон */
+            padding: 1.5rem; /* Внутренние отступы */
+            background-color: rgb(0, 32, 174);
+            text-align: center; /* Выравнивание по центру */
+            color: #ff00cc; /* Цвет текста */
+            margin-top: auto; /* Прижимаем к низу экрана */
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05); /* Тень сверху */
+        }
+
+        /* ========== АДАПТИВНОСТЬ ========== */
+        @media (max-width: 768px) {
+            /* Стили для мобильных устройств */
+            .container {
+                margin: 1rem; /* Уменьшаем отступы */
+                padding: 1.5rem; /* Уменьшаем внутренние отступы */
+            }
+            
+            /* Меняем направление flex на вертикальное */
+            .input-section {
+                flex-direction: column;
+            }
+            
+            /* Делаем кнопку на всю ширину */
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Шапка сайта с логотипом -->
+    <header>
+        <a href="#" class="logo">TaskDurak</a>
+        <h4>Это просто прикол</h4>
+    </header>
+ 
+    <!-- Основной контейнер с контентом -->
+    <div class="container">
+        <!-- Блок для ввода новых задач -->
+        <div class="input-section">
+            <!-- Поле для ввода текста задачи -->
+            <input type="text" id="taskInput" placeholder="Не пишите что-то...">
+            <!-- Кнопка добавления задачи -->
+            <button onclick="addTask()">Добавить просто текст</button>
+        </div>
+        
+        <!-- Список задач (заполняется динамически) -->
+        <ul class="task-list" id="taskList"></ul>
+    </div>
+
+    <!-- Подвал сайта -->
+    <footer>
+        <p>© 2025 TaskDurak. Все права ,будут удалены</p>
+        <p>Сделано без удовольствия за 5 минут в paint</p>
+    </footer>
+
+    <script>
+        // ========== ПЕРЕМЕННЫЕ И КОНСТАНТЫ ==========
+        // (не используются глобальные переменные, все данные хранятся в localStorage)
+
+        // ========== ОБРАБОТЧИКИ СОБЫТИЙ ==========
+        
+        // Загрузка задач при полной загрузке DOM
+        document.addEventListener('DOMContentLoaded', loadTasks);
+
+        // Обработка нажатия Enter в поле ввода
+        document.getElementById('taskInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') addTask();
+        });
+
+        // ========== ОСНОВНЫЕ ФУНКЦИИ ==========
+        
+        /**
+         * Добавление новой задачи
+         * 1. Получаем значение из поля ввода
+         * 2. Проверяем на пустую строку
+         * 3. Создаем объект задачи
+         * 4. Добавляем в DOM
+         * 5. Сохраняем в localStorage
+         */
+        function addTask() {
+            // Получаем элемент поля ввода
+            const taskInput = document.getElementById('taskInput');
+            
+            // Удаляем лишние пробелы и проверяем на пустоту
+            const taskText = taskInput.value.trim();
+            if (!taskText) {
+                // Добавляем класс ошибки на 0.5 секунды
+                taskInput.classList.add('error');
+                setTimeout(() => taskInput.classList.remove('error'), 500);
+                return;
+            }
+
+            // Создаем объект задачи с уникальным ID (текущее время в миллисекундах)
+            const task = {
+                id: Date.now(), // Уникальный идентификатор
+                text: taskText, // Текст задачи
+                completed: false // Статус выполнения
+            };
+
+            // Добавляем задачу в начало списка
+            addTaskToDOM(task);
+            
+            // Сохраняем задачу в хранилище
+            saveTaskToStorage(task);
+            
+            // Очищаем поле ввода и возвращаем фокус
+            taskInput.value = '';
+            taskInput.focus();
+        }
+
+        
+        
+        /**
+         * Отображение задачи в DOM
+         * @param {Object} task - Объект задачи
+         */
+        function addTaskToDOM(task) {
+            // Получаем список задач
+            const taskList = document.getElementById('taskList');
+            
+            // Создаем новый элемент списка
+            const li = document.createElement('li');
+            
+            // Устанавливаем классы и атрибуты
+            li.className = `task-item${task.completed ? ' completed' : ''}`;
+            li.setAttribute('data-id', task.id); // Сохраняем ID в атрибуте
+
+            // Внутреннее содержимое элемента задачи
+            li.innerHTML = `
+                <span>${task.text}</span>
+                <button onclick="toggleTask(${task.id})">✓</button>
+                <button class="delete-btn" onclick="deleteTask(${task.id})">✕</button>
+            `;
+
+            // Добавляем задачу в начало списка
+            taskList.prepend(li);
+        }
+
+        /**
+         * Переключение статуса выполнения задачи
+         * @param {number} id - ID задачи
+         */
+        function toggleTask(id) {
+            // Находим элемент задачи по ID
+            const taskElement = document.querySelector(`[data-id="${id}"]`);
+            
+            // Переключаем класс 'completed'
+            taskElement.classList.toggle('completed');
+            
+            // Обновляем данные в хранилище
+            const tasks = getTasksFromStorage();
+            const taskIndex = tasks.findIndex(task => task.id === id);
+            tasks[taskIndex].completed = !tasks[taskIndex].completed;
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        /**
+         * Удаление задачи с анимацией
+         * @param {number} id - ID задачи
+         */
+        function deleteTask(id) {
+            // Находим элемент задачи
+            const taskElement = document.querySelector(`[data-id="${id}"]`);
+            
+            // Добавляем класс для анимации удаления
+            taskElement.classList.add('deleting');
+            
+            // Удаляем элемент после завершения анимации (300ms)
+            setTimeout(() => {
+                taskElement.remove();
+                
+                // Обновляем данные в хранилище
+                const tasks = getTasksFromStorage();
+                const filteredTasks = tasks.filter(task => task.id !== id);
+                localStorage.setItem('tasks', JSON.stringify(filteredTasks));
+            }, 300);
+        }
+
+        // ========== РАБОТА С LOCALSTORAGE ==========
+        
+        /**
+         * Сохранение задачи в localStorage
+         * @param {Object} task - Объект задачи
+         */
+        function saveTaskToStorage(task) {
+            // Получаем текущий список задач
+            const tasks = getTasksFromStorage();
+            
+            // Добавляем новую задачу
+            tasks.push(task);
+            
+            // Сохраняем обновленный список
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        /**
+         * Получение списка задач из localStorage
+         * @returns {Array} Массив задач
+         */
+        function getTasksFromStorage() {
+            // Получаем данные из localStorage или пустой массив
+            return JSON.parse(localStorage.getItem('tasks') || '[]');
+        }
+
+        /**
+         * Загрузка задач при загрузке страницы
+         */
+        function loadTasks() {
+            // Получаем задачи из хранилища
+            const tasks = getTasksFromStorage();
+            
+            // Добавляем задачи в обратном порядке (новые сверху)
+            tasks.reverse().forEach(task => addTaskToDOM(task));
+        }
+    </script>
+</body>
+</html>
